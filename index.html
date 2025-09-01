@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Examen — Computación en la nube</title>
+  <style>
+    :root{--bg:#0a0f1a;--panel:#101a2c;--edge:#1a2a48;--txt:#eaf2ff;--muted:#9fb2c9;--accent:#5aa9e6;--ok:#2ecc71}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0a0f1a,#0e1626);color:var(--txt);font:14px system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial,sans-serif}
+    header{position:sticky;top:0;z-index:5;background:rgba(10,15,26,.8);backdrop-filter:blur(8px);border-bottom:1px solid var(--edge)}
+    .wrap{max-width:900px;margin:0 auto;padding:14px 18px;display:flex;gap:8px;align-items:center}
+    h1{font-size:16px;margin:0}
+    .muted{color:var(--muted)}
+
+    main{max-width:900px;margin:0 auto;padding:18px;display:grid;gap:16px}
+    .card{background:linear-gradient(180deg,rgba(16,26,44,.95),rgba(12,20,36,.95));border:1px solid var(--edge);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .q{font-size:18px;line-height:1.45;margin:6px 0 12px}
+
+    .options{display:grid;gap:10px}
+    .opt{display:flex;gap:12px;align-items:center;background:#0b1426;border:1px solid #223358;border-radius:12px;padding:10px 12px}
+    .opt input{appearance:none;width:18px;height:18px;border-radius:50%;border:2px solid #3b5a8f;display:inline-block;position:relative}
+    .opt input:checked{border-color:var(--accent)}
+    .opt input:checked::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--accent)}
+    .opt .text{flex:1;color:#d9e7ff}
+    .opt:hover{border-color:#34558d}
+    .opt.selected{outline:2px solid rgba(90,169,230,.35)}
+
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+    .grow{flex:1}
+    .btn{background:var(--accent);color:#071423;border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
+    .btn.sec{background:#17253f;color:var(--txt);border:1px solid var(--edge)}
+
+    .progress{font-weight:600}
+    .result{font-size:16px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Examen: Computación en la nube</h1>
+      <div class="grow"></div>
+      <div id="progress" class="progress muted">Pregunta 1 / 20</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" id="exam">
+      <div id="qtext" class="q">...</div>
+      <div id="opts" class="options"></div>
+      <div class="row">
+        <button id="next" class="btn" disabled>Siguiente ▷</button>
+        <div class="grow"></div>
+        <button id="finish" class="btn sec">Terminar</button>
+        <button id="restart" class="btn sec" style="display:none">Reiniciar</button>
+      </div>
+    </section>
+
+    <section class="card" id="summary" style="display:none">
+      <h3>Resultado</h3>
+      <p id="sumtext" class="result"></p>
+      <div class="row">
+        <button id="again" class="btn">Repetir examen</button>
+      </div>
+    </section>
+
+    <footer class="muted">Atajos: <strong>1–9</strong> elige opción, <strong>N</strong> siguiente, <strong>F</strong> terminar.</footer>
+  </main>
+
+  <script>
+    const DATA = [
+      {"question":"¿Qué es la computación en la nube?","options":["Un modelo de red local","Un modelo tecnológico que permite acceso a recursos informáticos a través de Internet","Un tipo de software de escritorio","Una red privada de servidores físicos"],"correct_answer":0},
+      {"question":"¿Qué empresa tiene la mayor cuota de mercado en servicios en la nube?","options":["Google Cloud Platform","Microsoft Azure","Amazon Web Services (AWS)","Oracle Cloud"],"correct_answer":0},
+      {"question":"¿Cuál de los siguientes es un modelo de servicio en la nube?","options":["IaaS","VPN","HTTP","LAN"],"correct_answer":0},
+      {"question":"¿Qué significa SaaS?","options":["Software as a Service","Storage as a Service","System as a Service","Security as a Service"],"correct_answer":0},
+      {"question":"¿Qué tipo de proveedor de nube ofrece servicios exclusivamente a una sola empresa?","options":["Proveedor de nube pública","Proveedor de nube híbrida","Proveedor de nube privada","Proveedor de nube compartida"],"correct_answer":0},
+      {"question":"¿Cuál es una ventaja clave de la computación en la nube?","options":["Mayor consumo energético","Acceso bajo demanda a recursos informáticos","Mayor necesidad de hardware físico","Menor escalabilidad"],"correct_answer":0},
+      {"question":"¿Qué proveedor destaca por sus capacidades de inteligencia artificial?","options":["Google Cloud Platform","IBM Cloud","Rackspace","Digital Ocean"],"correct_answer":0},
+      {"question":"¿Qué modelo de servicio permite a los usuarios ejecutar aplicaciones sin gestionar la infraestructura?","options":["IaaS","PaaS","SaaS","VPN"],"correct_answer":0},
+      {"question":"¿Qué proveedor ofrece Amazon EC2 y S3?","options":["Google Cloud","Microsoft Azure","Amazon Web Services","Oracle Cloud"],"correct_answer":0},
+      {"question":"¿Qué porcentaje del mercado global de nube tienen AWS, Azure y GCP juntos?","options":["45%","55%","65%","75%"],"correct_answer":0},
+      {"question":"¿Qué proveedor de nube tiene sede en China?","options":["Alibaba Cloud","Salesforce Cloud","OVHCloud","IBM Cloud"],"correct_answer":0},
+      {"question":"¿Qué modelo de nube combina servicios públicos y privados?","options":["Nube híbrida","Nube privada","Nube pública","Nube comunitaria"],"correct_answer":0},
+      {"question":"¿Qué proveedor ofrece Azure Hybrid Benefit?","options":["Amazon Web Services","Google Cloud","Microsoft Azure","Oracle Cloud"],"correct_answer":0},
+      {"question":"¿Qué proveedor tiene una cuota de mercado del 32%?","options":["Google Cloud","Amazon Web Services","Microsoft Azure","IBM Cloud"],"correct_answer":0},
+      {"question":"¿Qué servicio ofrece bases de datos gestionadas en AWS?","options":["Amazon EC2","Amazon S3","Amazon RDS","Amazon Lambda"],"correct_answer":0},
+      {"question":"¿Qué proveedor tiene sede en Francia?","options":["Rackspace","OVHCloud","Salesforce Cloud","Alibaba Cloud"],"correct_answer":0},
+      {"question":"¿Qué modelo de servicio permite alquilar recursos como máquinas virtuales?","options":["SaaS","PaaS","IaaS","VPN"],"correct_answer":0},
+      {"question":"¿Qué proveedor tiene ingresos anuales de aproximadamente $34 mil millones?","options":["Google Cloud","Microsoft Azure","Amazon Web Services","Oracle Cloud"],"correct_answer":0},
+      {"question":"¿Qué proveedor es conocido por su escalabilidad en nube pública?","options":["IBM Cloud","Amazon Web Services","Oracle Cloud","Salesforce Cloud"],"correct_answer":0},
+      {"question":"¿Qué porcentaje de empresas usa un modelo de nube híbrida según Flexera?","options":["62%","72%","82%","92%"],"correct_answer":0}
+    ];
+
+    const $ = (id)=>document.getElementById(id);
+    const qtext = $('qtext');
+    const opts = $('opts');
+    const nextBtn = $('next');
+    const finishBtn = $('finish');
+    const restartBtn = $('restart');
+    const progress = $('progress');
+    const exam = $('exam');
+    const summary = $('summary');
+    const sumtext = $('sumtext');
+    const again = $('again');
+
+    let i = 0; // índice de pregunta
+    const picks = new Array(DATA.length).fill(null); // índice elegido por pregunta
+
+    function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+    function render(){
+      const total = DATA.length;
+      progress.textContent = `Pregunta ${i+1} / ${total}`;
+      const item = DATA[i];
+      qtext.innerHTML = esc(item.question);
+      opts.innerHTML = '';
+      item.options.forEach((txt,idx)=>{
+        const lab = document.createElement('label');
+        lab.className = 'opt' + (picks[i]===idx? ' selected': '');
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'opt';
+        input.value = String(idx);
+        input.checked = picks[i]===idx;
+        input.addEventListener('change',()=>{ picks[i]=idx; nextBtn.disabled=false; markSelected(idx); });
+        const span = document.createElement('span');
+        span.className = 'text';
+        span.textContent = txt;
+        lab.appendChild(input);
+        lab.appendChild(span);
+        opts.appendChild(lab);
+      });
+      nextBtn.textContent = (i===total-1)? 'Finalizar' : 'Siguiente ▷';
+      nextBtn.disabled = picks[i]===null;
+    }
+
+    function markSelected(idx){
+      [...opts.children].forEach((el,k)=> el.classList.toggle('selected', k===idx));
+    }
+
+    function next(){
+      if(picks[i]===null) return;
+      if(i < DATA.length-1){ i++; render(); }
+      else { finish(); }
+    }
+
+    function finish(){
+      const total = DATA.length;
+      const hits = picks.filter((p,idx)=> p===DATA[idx].correct_answer).length;
+      const pct = Math.round(100*hits/total);
+      exam.style.display='none';
+      summary.style.display='block';
+      sumtext.textContent = `Tu puntaje: ${hits} / ${total} (${pct}%)`;
+      restartBtn.style.display='inline-block';
+    }
+
+    function restart(){
+      for(let k=0;k<picks.length;k++) picks[k]=null;
+      i=0; exam.style.display='block'; summary.style.display='none'; render();
+    }
+
+    nextBtn.addEventListener('click', next);
+    finishBtn.addEventListener('click', finish);
+    restartBtn.addEventListener('click', restart);
+    again.addEventListener('click', restart);
+
+    document.addEventListener('keydown',(e)=>{
+      const k = e.key.toLowerCase();
+      if(k==='n'){ next(); }
+      if(k==='f'){ finish(); }
+      const n = Number(e.key);
+      if(Number.isInteger(n) && n>=1){
+        const idx = n-1;
+        const max = (DATA[i]?.options?.length||0);
+        if(idx < max){ picks[i]=idx; nextBtn.disabled=false; markSelected(idx); [...opts.querySelectorAll('input[name=opt]')][idx].checked=true; }
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
